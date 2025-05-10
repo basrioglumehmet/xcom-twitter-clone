@@ -1,6 +1,6 @@
 CREATE TABLE posts (
   id bigint primary key generated always as identity,
-  user_id uuid NOT NULL,
+  profile_id bigint NOT NULL,
   content text NOT NULL,
   content_type text NOT NULL,
   geo_lat double precision NOT NULL,
@@ -10,9 +10,35 @@ CREATE TABLE posts (
 );
 
 ALTER TABLE posts
-  ADD CONSTRAINT FK_UserId FOREIGN KEY (user_id)
-    REFERENCES auth.users(id) ON DELETE CASCADE;
+  ADD CONSTRAINT FK_ProfileId FOREIGN KEY (profile_id)
+    REFERENCES user_profiles(id) ON DELETE CASCADE;
 
-CREATE INDEX idx_user_id ON posts(user_id);
+CREATE INDEX idx_profile_id ON posts(profile_id);
 
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+
+
+-- Insert yetkisi
+CREATE POLICY "Allow authenticated inserts" ON posts
+  FOR INSERT
+  TO authenticated
+  WITH CHECK (true);
+
+-- Select yetkisi
+CREATE POLICY "Allow authenticated selects" ON posts
+  FOR SELECT
+  TO authenticated
+  USING (true);
+
+-- Update yetkisi
+CREATE POLICY "Allow authenticated updates" ON posts
+  FOR UPDATE
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+-- Delete yetkisi
+CREATE POLICY "Allow authenticated deletes" ON posts
+  FOR DELETE
+  TO authenticated
+  USING (true);

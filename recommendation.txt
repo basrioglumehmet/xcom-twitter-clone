@@ -1,0 +1,48 @@
+const ss = require('simple-statistics');
+
+// Simüle edilmiş tweet'ler
+const tweets = [
+    { id: 1, text: "Yeni bir AI aracı keşfettim! 🤖 #Teknoloji" },
+    { id: 2, text: "Gün batımı muhteşemdi 🌅 #Doğa" },
+    { id: 3, text: "Kahve olmadan sabah olmaz ☕ #SabahKeyfi" },
+    { id: 4, text: "Kod hata verdi, yine! 😅 #Programlama" },
+    { id: 5, text: "Hafta sonu planları hazır! 🎉 #Cuma" }
+];
+
+// Kullanıcı beğenileri: her kullanıcı için beğenilen tweet ID'leri
+const userLikes = [
+    { userId: "u1", likedTweetIds: [1, 3, 5] }, // Hedef kullanıcı
+    { userId: "u2", likedTweetIds: [1, 2, 5] },
+    { userId: "u3", likedTweetIds: [2, 3, 4] },
+    { userId: "u4", likedTweetIds: [1, 3, 4] }
+];
+
+// Jaccard benzerliği hesaplama fonksiyonu
+function jaccardSimilarity(setA, setB) {
+    const intersection = setA.filter(x => setB.includes(x)).length;
+    const union = new Set([...setA, ...setB]).size;
+    return intersection / union;
+}
+
+// Hedef kullanıcı (u1) ile diğer kullanıcılar arasında Jaccard benzerliği hesaplama
+const targetUser = userLikes[0].likedTweetIds;
+const similarities = userLikes.slice(1).map(otherUser => ({
+    userId: otherUser.userId,
+    similarity: jaccardSimilarity(targetUser, otherUser.likedTweetIds)
+}));
+
+// Benzerliklere göre sıralama (azalan)
+similarities.sort((a, b) => b.similarity - a.similarity);
+
+// En benzer kullanıcının beğendiği ama hedef kullanıcının beğenmediği tweet'leri öner
+const mostSimilarUser = userLikes.find(u => u.userId === similarities[0].userId);
+const recommendations = mostSimilarUser.likedTweetIds
+    .filter(tweetId => !targetUser.includes(tweetId))
+    .map(tweetId => tweets.find(tweet => tweet.id === tweetId));
+
+// Twitter tarzı çıktı
+console.log("🔥 Sana Özel Önerilen Tweet'ler 🔥");
+recommendations.forEach(tweet => {
+    console.log(`Tweet: ${tweet.text}`);
+    console.log("---");
+});

@@ -5,7 +5,7 @@ import rootReducer from "./rootReducer";
 
 //If using production, please remove logger middleware!
 const middlewareArray = [logger];
-0;
+
 //Store
 const store = configureStore({
   reducer: rootReducer,

@@ -9,7 +9,7 @@ const MiniProfile = (props: Props) => {
       <div className="flex flex-row w-full">
         <div className="w-10 h-10 bg-background-HOVER rounded-full flex items-center justify-center">
           <img
-            src="https://i.pinimg.com/736x/8b/e2/b0/8be2b0524206cab7eceabf92f3c0260a.jpg"
+            src="https://i.pinimg.com/736x/7b/4c/e5/7b4ce54a528d667167d1644f2eff6080.jpg"
             alt="Profile"
             className="rounded-full w-full h-full"
           />
@@ -20,7 +20,7 @@ const MiniProfile = (props: Props) => {
         </div>
         <div className="flex items-center justify-end ">
           <button>
-            <EllipsisIcon />
+            <EllipsisVerticalIcon />
           </button>
         </div>
       </div>

@@ -2,28 +2,32 @@
 
 import Links, { DashboardLink } from "@/app/constants/home-links-constant";
 import React from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const DashboardLinks = () => {
   const pathname = usePathname();
+  const navigation = useRouter();
 
   return (
-    <div className="flex flex-col gap-5 w-full text-lg">
+    <div className="flex xl:flex-col xl:gap-2 justify-between xl:justify-start w-full ">
       {Links.map((link: DashboardLink) => (
-        <div key={link.name} className="flex items-center group cursor-pointer">
+        <div
+          key={link.name}
+          onClick={() => navigation.push(link.href)}
+          className="flex items-center group cursor-pointer flex-1 xl:flex-auto"
+        >
           <div
             className={`
               flex flex-row items-center rounded-full p-2 gap-3
               group-hover:bg-background-1
             `}
           >
-            <div className="w-8 h-8 flex items-center justify-center">
-              <link.icon className="w-6 h-6  stroke-white " />
+            <div className="xl:w-8 xl:h-8 w-6 h-6 flex items-center justify-center">
+              <link.icon className="w-full h-full  stroke-black " />
             </div>
             <a
-              href={link.href}
-              className={`font-medium ${
-                pathname === link.href ? "text-white font-bold" : "text-white"
+              className={`font-medium hidden xl:block ${
+                pathname === link.href ? "text-black font-bold" : "text-black"
               }`}
             >
               {link.name}

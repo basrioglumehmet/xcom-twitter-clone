@@ -6,9 +6,11 @@ import { SubmitButton } from "@/components/submit-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { ResendOtpButton } from "@/components/resendotp-button";
 
 export default async function Login(props: { searchParams: Promise<Message> }) {
   const searchParams = await props.searchParams;
+
   return (
     <form className="flex flex-col items-start justify-center  gap-5">
       <h1 className="text-7xl font-bold">Happening now</h1>

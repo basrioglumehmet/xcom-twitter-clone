@@ -4,17 +4,21 @@ import {
   BellRingIcon,
   BookmarkIcon,
   CircleEllipsisIcon,
+  CogIcon,
   CompassIcon,
   DollarSign,
+  EllipsisVertical,
   HomeIcon,
   Mail,
+  User2,
   UserCircleIcon,
 } from "lucide-react";
+import Logo from "@/components/logo";
 
 export interface DashboardLink {
   name: string;
   href: string;
-  icon: React.ComponentType | string;
+  icon: React.ComponentType | string | React.ReactNode;
   description: string;
 }
 
@@ -52,19 +56,19 @@ const Links: DashboardLink[] = [
   {
     name: "Premium",
     href: "/premium",
-    icon: DollarSign,
+    icon: Logo,
     description: "View your profile",
   },
   {
     name: "Profile",
-    href: "/profile",
-    icon: UserCircleIcon,
+    href: "/dashboard/profile/all",
+    icon: User2,
     description: "View your profile",
   },
   {
     name: "Settings",
     href: "/settings",
-    icon: CircleEllipsisIcon,
+    icon: CogIcon,
     description: "Manage your account settings",
   },
 ];

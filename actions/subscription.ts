@@ -11,12 +11,7 @@ export async function checkSubscription(userId: string): Promise<boolean> {
       .select("status")
       .eq("user_id", userId)
       .limit(1)
-      .single();
-
-    if (error) {
-      console.error("Error checking subscription:", error);
-      throw new Error(`Failed to check subscription: ${error.message}`);
-    }
+      .single();  
 
     return !!subscription; // Returns true if an active subscription exists, false otherwise
   } catch (err) {

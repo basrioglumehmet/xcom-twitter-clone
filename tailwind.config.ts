@@ -20,13 +20,13 @@ const config = {
     extend: {
       colors: {
         background: {
-          DEFAULT: "black",
-          1: "#181818",
-          2: "#080808",
+          DEFAULT: "#ffffff",
+          1: "#e7e7e8",
+          2: "#f7f7f7",
           3: `#16181c`,
         },
-        border: "#333639",
-        input: "#333639",
+        border: "#d2dbe0",
+        input: "#d2dbe0",
         ring: "#208bfe",
         foreground: "hsl(var(--foreground))",
         primary: {
@@ -34,8 +34,8 @@ const config = {
           foreground: "#FFF",
         },
         secondary: {
-          DEFAULT: "#1e2936",
-          foreground: "#aebbc9",
+          DEFAULT: "#000",
+          foreground: "#fff",
         },
         destructive: {
           DEFAULT: "#f91880",

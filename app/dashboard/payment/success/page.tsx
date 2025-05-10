@@ -1,3 +1,4 @@
+import SuccessLottie from "@/components/ui/success-lottie";
 import { stripe } from "@/lib/stripe";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
@@ -7,7 +8,7 @@ export default async function Success({
 }: {
   searchParams: Promise<{ session_id?: string }>;
 }) {
-  const params = await searchParams; // Await searchParams
+  const params = await searchParams;
   const sessionId = params.session_id;
 
   if (!sessionId) {
@@ -21,7 +22,6 @@ export default async function Success({
       expand: ["subscription"],
     });
 
-    // Log session for debugging
     console.log("Retrieved session:", session);
 
     // Check if session has a subscription
@@ -36,26 +36,62 @@ export default async function Success({
         ? session.subscription
         : session.subscription.id
     );
+
     const supabase = await createClient();
 
-    const { data, error } = await supabase
+    // Check if a subscription already exists for the user
+    const { data: existingSubscription, error: checkError } = await supabase
       .from("subscriptions")
-      .insert({
-        user_id: session.metadata?.userId,
-        subscription_id: subscription.id,
-        status: subscription.status,
-        plan: "Premium Subscription", // Adjust based on your plan
-      })
-      .eq("subscription_id", subscription.id); // Adjust condition for your update logic
+      .select("subscription_id, status")
+      .eq("user_id", session.metadata?.userId)
+      .single();
 
-    if (error) {
-      console.error("Error updating subscription:", error);
-      // Handle error (e.g., redirect to an error page)
+    if (checkError && checkError.code !== "PGRST116") {
+      // PGRST116 means no rows found, which is expected if no subscription exists
+      console.error("Error checking existing subscription:", checkError);
+      throw new Error("Failed to check existing subscription");
+    }
+
+    if (existingSubscription) {
+      console.log(
+        `Subscription already exists for user ${session.metadata?.userId}:`,
+        existingSubscription
+      );
+      // Optionally update the existing subscription if needed
+      const { error: updateError } = await supabase
+        .from("subscriptions")
+        .update({
+          subscription_id: subscription.id,
+          status: subscription.status,
+          plan: "Premium Subscription",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", session.metadata?.userId);
+
+      if (updateError) {
+        console.error("Error updating subscription:", updateError);
+        throw new Error("Failed to update subscription");
+      }
+    } else {
+      // Insert new subscription
+      const { error: insertError } = await supabase
+        .from("subscriptions")
+        .insert({
+          user_id: session.metadata?.userId,
+          subscription_id: subscription.id,
+          status: subscription.status,
+          plan: "Premium Subscription",
+        });
+
+      if (insertError) {
+        console.error("Error inserting subscription:", insertError);
+        throw new Error("Failed to insert subscription");
+      }
     }
 
     return (
       <main className="flex min-h-screen flex-col items-center justify-center p-24">
-        <h1 className="text-2xl font-bold">Subscription Successful!</h1>
+        <SuccessLottie />
         <p>
           Thank you for subscribing. Your subscription is {subscription.status}.
         </p>

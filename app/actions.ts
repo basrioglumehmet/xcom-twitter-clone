@@ -1,10 +1,18 @@
 "use server";
 
+import {
+  uniqueNamesGenerator,
+  adjectives,
+  colors,
+  animals,
+} from "unique-names-generator";
+
 import { encodedRedirect } from "@/utils/utils";
 import { createClient } from "@/utils/supabase/server";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-
+import { UserProfileModel } from "@/model/userProfileModel";
+import { SupabaseClient } from "@supabase/supabase-js";
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
@@ -18,25 +26,35 @@ export const signUpAction = async (formData: FormData) => {
       "Email and password are required"
     );
   }
+  const functionResult = await supabase.rpc("check_user_exists_by_id", {
+    user_email: email,
+  });
 
-  const { error,data } = await supabase.auth.signUp({
+  if (functionResult.data == false) {
+    return generateNewAccount(email, password, supabase, origin);
+  } else {
+    return encodedRedirect("error", "/sign-up", "Email is taken");
+  }
+};
+
+export const regenerateOtpCodeAction = async (formData: FormData) => {
+  const email = formData.get("email") as string;
+  const supabase = await createClient();
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
     email,
-    password,
-    options: {
-      emailRedirectTo: `${origin}/auth/callback`,
-    },
   });
 
   if (error) {
-    console.error(error.code + " " + error.message);
-    return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link."
-    );
+    return encodedRedirect("error", "/sign-in", error.message);
   }
+
+  return encodedRedirect(
+    "success",
+    "/sign-in",
+    "Please check your email for a verification link."
+  );
 };
 
 export const signInAction = async (formData: FormData) => {
@@ -132,3 +150,51 @@ export const signOutAction = async () => {
   await supabase.auth.signOut();
   return redirect("/sign-in");
 };
+
+async function generateNewAccount(
+  email: string,
+  password: string,
+  supabase: SupabaseClient<any, "public", any>,
+  origin: string | null
+) {
+  const { error: signUpError, data: signUpData } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${origin}/auth/callback`,
+    },
+  });
+
+  const userId = signUpData.user?.id;
+
+  if (userId) {
+    // Create a new profile
+    const shortName = uniqueNamesGenerator({
+      dictionaries: [adjectives, animals, colors],
+      length: 2,
+      separator: "_",
+    });
+    const profileObject = {
+      is_verified: false,
+      screen_name: shortName,
+      tag_name: shortName.replaceAll("_", ""),
+      user_id: userId,
+    } as UserProfileModel;
+
+    const { error: profileError } = await supabase
+      .from("user_profiles")
+      .insert(profileObject);
+
+    if (profileError) {
+      console.error("Profile insert error: ", profileError.message);
+      console.error("Profile object: ", profileObject);
+      return encodedRedirect("error", "/sign-up", "Failed to create profile");
+    }
+
+    return encodedRedirect(
+      "success",
+      "/sign-up",
+      "Thanks for signing up! Please check your email for a verification link."
+    );
+  }
+}

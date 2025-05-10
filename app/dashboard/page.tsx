@@ -1,28 +1,27 @@
+"use client";
 import FeedBox from "@/components/feedbox";
 import FeedTabLinkItems from "@/components/feedtab-link-items";
 import FetchDataSteps from "@/components/tutorial/fetch-data-steps";
-import { createClient } from "@/utils/supabase/server";
+import { toggleOperationModal } from "@/store/actions/operationModalActions";
+import { useAppDispatch } from "@/store/configureStore";
+import { createClient } from "@/utils/supabase/client";
 import { InfoIcon } from "lucide-react";
-import { redirect } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default async function dashboardPage() {
-  const supabase = await createClient();
+export default function DashboardPage() {
+  const supabase = createClient();
+  const dispatch = useAppDispatch();
+  const router = useRouter();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return redirect("/sign-in");
-  }
-
-  return (
-    <div className="flex-1 flex flex-col w-full">
-      {/* <div>
-        {Array.from({ length: 100 }, (_, i) => (
-          <FeedBox key={i} />
-        ))}
-      </div> */}
-    </div>
-  );
+  useEffect(() => {
+    const check = async () => {
+      const res = await supabase.auth.getUser();
+      if (res.data.user != null) {
+        await dispatch(toggleOperationModal(false));
+        router.replace("/dashboard/feed/for-you");
+      }
+    };
+    check();
+  }, []);
 }
